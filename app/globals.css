@@ -2,16 +2,58 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ecf2f0;
+  --bg2: #f7fbf9;
+  --nav: #ffffff;
+  --surface: #ffffff;
+  --solid: #ffffff;
+  --border: rgba(16, 28, 45, 0.1);
+  --text: #28394c;
+  --head: #0f1b2d;
+  --muted: #5a6979;
+  --faint: #8494a4;
+  --teal: #0d9488;
+  --teal-soft: rgba(13, 148, 136, 0.11);
+  --indigo: #4f46e5;
+  --indigo-soft: rgba(79, 70, 229, 0.1);
+  --amber: #b45309;
+  --track: rgba(16, 28, 45, 0.08);
+  --on-teal: #ffffff;
+  --shadow: 0 12px 30px rgba(10, 15, 23, 0.1);
+}
+
+[data-theme="dark"] {
   color-scheme: dark;
+  --bg: #0a0f17;
+  --bg2: #0e1622;
+  --nav: #0c121d;
+  --surface: rgba(255, 255, 255, 0.04);
+  --solid: #131c2b;
+  --border: rgba(255, 255, 255, 0.09);
+  --text: #d8e2ee;
+  --head: #f3f8fd;
+  --muted: #8494a8;
+  --faint: #5e6e81;
+  --teal: #2dd4bf;
+  --teal-soft: rgba(45, 212, 191, 0.15);
+  --indigo: #8b93f8;
+  --indigo-soft: rgba(139, 147, 248, 0.17);
+  --amber: #fbbf24;
+  --track: rgba(255, 255, 255, 0.08);
+  --on-teal: #04231f;
+  --shadow: 0 12px 30px rgba(10, 15, 23, 0.3);
 }
 
 body {
-  @apply bg-ink text-gray-200 antialiased;
+  @apply bg-canvas text-body antialiased;
+  font-family: "Nunito", system-ui, sans-serif;
 }
 
-.prose-sensei h1 { @apply text-2xl font-semibold mt-4 mb-2; }
-.prose-sensei h2 { @apply text-xl font-semibold mt-4 mb-2; }
-.prose-sensei p  { @apply my-2 leading-relaxed; }
-.prose-sensei code { @apply bg-edge px-1 py-0.5 rounded text-sm; }
-.prose-sensei pre { @apply bg-black/40 p-3 rounded-lg overflow-x-auto my-3 text-sm; }
+.prose-sensei h1 { @apply text-2xl font-semibold mt-4 mb-2 text-head; font-family: "Fredoka", sans-serif; }
+.prose-sensei h2 { @apply text-xl font-semibold mt-4 mb-2 text-head; font-family: "Fredoka", sans-serif; }
+.prose-sensei p { @apply my-2 leading-relaxed; }
+.prose-sensei code { @apply bg-track px-1 py-0.5 rounded text-sm; }
+.prose-sensei pre { @apply bg-track p-3 rounded-lg overflow-x-auto my-3 text-sm; }

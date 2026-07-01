@@ -1,4 +1,4 @@
-import { Card, SectionTitle, Badge, EmptyState } from "@/components/ui";
+import { Card, SectionTitle, Badge, EmptyState, PageHeader } from "@/components/ui";
 import { getLessons, getProjects } from "@/lib/queries";
 
 export const revalidate = 300;
@@ -8,21 +8,18 @@ export default async function ArchivePage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">Archive</h1>
-        <p className="text-muted text-sm mt-1">Everything Sensei has taught so far.</p>
-      </div>
+      <PageHeader title="Archive" subtitle="Everything Sensei has taught so far." />
 
       <section>
         <SectionTitle>Past lessons</SectionTitle>
         {lessons.length === 0 ? (
           <EmptyState title="No lessons yet." />
         ) : (
-          <Card className="p-0 divide-y divide-edge">
+          <Card className="divide-y divide-edge p-0">
             {lessons.map((l) => (
               <div key={l.id} className="flex items-center gap-3 px-4 py-3">
-                <span className="text-xs text-muted w-24">{l.lesson_date}</span>
-                <span className="text-gray-300">{l.title}</span>
+                <span className="w-24 text-xs text-faint">{l.lesson_date}</span>
+                <span className="text-body">{l.title}</span>
                 <span className="ml-auto">
                   <Badge>{l.format}</Badge>
                 </span>
@@ -37,17 +34,18 @@ export default async function ArchivePage() {
         {projects.length === 0 ? (
           <EmptyState title="No projects yet." />
         ) : (
-          <Card className="p-0 divide-y divide-edge">
+          <div className="grid gap-4 md:grid-cols-2">
             {projects.map((p) => (
-              <div key={p.id} className="flex items-center gap-3 px-4 py-3">
-                <Badge>Week {p.week}</Badge>
-                <span className="text-gray-300">{p.title}</span>
-                <span className="ml-auto">
-                  <Badge>{p.status}</Badge>
-                </span>
-              </div>
+              <Card key={p.id}>
+                <Badge tone="indigo">Week {p.week}</Badge>
+                <h3 className="mt-2 font-display text-lg font-semibold text-head">{p.title}</h3>
+                <div className="mt-3.5 flex items-center gap-2">
+                  <span className="h-[7px] w-[7px] flex-none rounded-full bg-teal" />
+                  <span className="text-[13px] font-semibold text-muted">{p.status}</span>
+                </div>
+              </Card>
             ))}
-          </Card>
+          </div>
         )}
       </section>
     </div>

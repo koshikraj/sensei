@@ -1,4 +1,4 @@
-import { Card, Badge, EmptyState } from "@/components/ui";
+import { Card, Badge, EmptyState, PageHeader } from "@/components/ui";
 import { getNews } from "@/lib/queries";
 
 export const revalidate = 300;
@@ -8,31 +8,32 @@ export default async function NewsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-white">News</h1>
-        <p className="text-muted text-sm mt-1">Curated updates relevant to your current module.</p>
-      </div>
+      <PageHeader title="News" subtitle="Curated updates relevant to your current module." />
 
       {news.length === 0 ? (
         <EmptyState title="No news yet." hint="The sensei-news routine posts a digest a few times a week." />
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3.5">
           {news.map((n) => (
             <Card key={n.id}>
-              <div className="flex items-center gap-2 mb-1">
-                {n.module && <Badge>{n.module}</Badge>}
-                <span className="text-xs text-muted">{n.news_date}</span>
+              <div className="mb-2 flex items-center gap-2.5">
+                {n.source && <Badge tone="indigo">{n.source}</Badge>}
+                <span className="text-xs text-faint">{n.news_date}</span>
               </div>
               <a
                 href={n.url}
                 target="_blank"
                 rel="noreferrer"
-                className="text-white font-medium hover:text-accent"
+                className="font-display text-lg font-semibold text-head hover:text-teal"
               >
                 {n.title}
               </a>
-              {n.summary && <p className="mt-1 text-sm text-gray-300">{n.summary}</p>}
-              {n.source && <p className="mt-1 text-xs text-muted">{n.source}</p>}
+              {n.summary && <p className="mt-2 text-sm leading-relaxed text-muted">{n.summary}</p>}
+              {n.module && (
+                <div className="mt-3.5">
+                  <Badge tone="teal">{n.module}</Badge>
+                </div>
+              )}
             </Card>
           ))}
         </div>

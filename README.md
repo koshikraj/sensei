@@ -37,5 +37,6 @@ works immediately.
 
 ## Create the routines
 
-Use the Claude Code `/schedule` skill to create one routine per file in `routines/`,
-wiring the Supabase (service key) and Slack MCPs. Fixed cron times per the plan.
+Ready-to-paste `/schedule` prompts for the **daily topic** and **daily quiz** schedulers are in
+[routines/README.md](routines/README.md) (with the project/news specs alongside). Wire the
+Supabase + Slack MCPs and point them at `#sensei`.

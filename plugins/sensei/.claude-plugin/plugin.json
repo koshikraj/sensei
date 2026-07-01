@@ -1,0 +1,20 @@
+{
+  "name": "sensei",
+  "description": "The Sensei AI-engineering tutor: a friendly, non-technical persona over the Supabase-backed curriculum, with the Supabase MCP wired in.",
+  "version": "0.1.0",
+  "author": { "name": "Koshik Raj" },
+  "keywords": ["education", "ai-engineering", "tutor", "supabase", "slack"],
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--project-ref=${SUPABASE_PROJECT_REF}"
+      ],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

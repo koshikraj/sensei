@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-ink text-gray-200 antialiased;
+}
+
+.prose-sensei h1 { @apply text-2xl font-semibold mt-4 mb-2; }
+.prose-sensei h2 { @apply text-xl font-semibold mt-4 mb-2; }
+.prose-sensei p  { @apply my-2 leading-relaxed; }
+.prose-sensei code { @apply bg-edge px-1 py-0.5 rounded text-sm; }
+.prose-sensei pre { @apply bg-black/40 p-3 rounded-lg overflow-x-auto my-3 text-sm; }

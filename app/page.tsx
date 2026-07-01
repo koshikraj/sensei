@@ -1,27 +1,28 @@
 import { Card, SectionTitle, Badge, EmptyState, PageHeader, MasteryRing } from "@/components/ui";
 import Mascot from "@/components/Mascot";
 import { isConfigured } from "@/lib/supabase";
-import { getLatestLesson, getLatestQuiz, getCurrentProject, getMastery } from "@/lib/queries";
+import { getToday } from "@/lib/queries";
 
 export const revalidate = 300;
 
-export default async function TodayPage() {
-  const [lesson, quiz, project, mastery] = await Promise.all([
-    getLatestLesson(),
-    getLatestQuiz(),
-    getCurrentProject(),
-    getMastery(),
-  ]);
+const lessonMark: Record<string, string> = { completed: "✓", available: "•", planned: "·" };
 
-  const avg =
-    mastery.length > 0 ? Math.round(mastery.reduce((s, m) => s + m.score, 0) / mastery.length) : 0;
+const quizLabel: Record<string, string> = {
+  locked: "Finish the lessons to unlock the quiz",
+  due: "Quiz is due — finish your lessons",
+  available: "Quiz ready — answer it in #sensei",
+  completed: "Quiz complete ✓",
+};
+
+export default async function TodayPage() {
+  const { topic, lessons, resources, quizStatus, topicsDone, topicsTotal, avgMastery } = await getToday();
 
   return (
     <div className="space-y-7">
       <PageHeader
         title="Today"
-        subtitle="Your 30-minute AI Engineering session."
-        right={<MasteryRing value={avg} />}
+        subtitle={topicsTotal ? `Topic ${topicsDone + (topic ? 1 : 0)} of ${topicsTotal}` : "Your AI Engineering journey"}
+        right={<MasteryRing value={avgMastery} />}
       />
 
       <div
@@ -30,9 +31,11 @@ export default async function TodayPage() {
       >
         <Mascot size={40} className="flex-none" />
         <div>
-          <div className="text-[15px] font-extrabold text-head">Your sensei is ready.</div>
+          <div className="text-[15px] font-extrabold text-head">
+            {topic ? `Today's topic: ${topic.title}` : "Ready when you are."}
+          </div>
           <div className="mt-0.5 text-[13.5px] text-muted">
-            A focused lesson, a quick quiz, and this week&apos;s project — all in one place.
+            {topic ? `${topic.module} · finish the lessons, then take the quiz to complete the topic.` : "Your sensei will start the first topic soon."}
           </div>
         </div>
       </div>
@@ -40,59 +43,83 @@ export default async function TodayPage() {
       {!isConfigured() && (
         <EmptyState
           title="Supabase isn't connected yet."
-          hint="Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY, then run schema.sql + seed.sql."
+          hint="Set NEXT_PUBLIC_SUPABASE_URL + PUBLISHABLE_KEY, then run npm run db:setup."
         />
       )}
 
-      <section>
-        <SectionTitle>Today&apos;s lesson</SectionTitle>
-        {lesson ? (
-          <Card>
-            <div className="mb-2 flex items-center gap-2">
-              <Badge tone="indigo">{lesson.format}</Badge>
-              <span className="text-xs text-faint">{lesson.lesson_date}</span>
-            </div>
-            <h2 className="mb-2 font-display text-2xl font-semibold text-head">{lesson.title}</h2>
-            <div className="prose-sensei line-clamp-6 whitespace-pre-wrap text-sm text-muted">
-              {lesson.content}
-            </div>
-          </Card>
-        ) : (
-          <EmptyState title="No lesson yet." hint="The sensei-lesson routine posts the first one tomorrow morning." />
-        )}
-      </section>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <section>
-          <SectionTitle>Today&apos;s quiz</SectionTitle>
-          {quiz ? (
+      {topic ? (
+        <>
+          <section>
+            <SectionTitle>Current topic</SectionTitle>
             <Card>
-              <span className="text-xs text-faint">{quiz.quiz_date}</span>
-              <p className="mt-2 text-sm text-muted">
-                {Array.isArray(quiz.questions) ? quiz.questions.length : 0} questions waiting in{" "}
-                <span className="text-head">#sensei</span> — answer there.
-              </p>
+              <Badge tone="teal">{topic.module}</Badge>
+              <h2 className="mt-2 font-display text-2xl font-semibold text-head">{topic.title}</h2>
+              {topic.description && <p className="mt-2 text-[15px] leading-relaxed text-muted">{topic.description}</p>}
+              {topic.objectives && <p className="mt-2 text-sm text-faint">{topic.objectives}</p>}
             </Card>
-          ) : (
-            <EmptyState title="No quiz yet." />
-          )}
-        </section>
+          </section>
 
-        <section>
-          <SectionTitle>This week&apos;s project</SectionTitle>
-          {project ? (
+          <div className="grid gap-5 md:grid-cols-2">
+            <section>
+              <SectionTitle>Lessons</SectionTitle>
+              {lessons.length ? (
+                <Card className="divide-y divide-edge p-0">
+                  {lessons.map((l) => (
+                    <div key={l.position} className="flex items-center gap-3 px-4 py-3">
+                      <span className={`w-4 text-center ${l.status === "completed" ? "text-teal" : "text-faint"}`}>
+                        {lessonMark[l.status] ?? "·"}
+                      </span>
+                      <span className={l.status === "completed" ? "text-head" : "text-body"}>{l.title}</span>
+                      <span className="ml-auto">
+                        <Badge>{l.format}</Badge>
+                      </span>
+                    </div>
+                  ))}
+                </Card>
+              ) : (
+                <EmptyState title="Lessons will appear when the topic starts." />
+              )}
+            </section>
+
+            <section>
+              <SectionTitle>Resources</SectionTitle>
+              {resources.length ? (
+                <Card className="divide-y divide-edge p-0">
+                  {resources.map((r, i) => (
+                    <a
+                      key={i}
+                      href={r.url ?? "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-track/40"
+                    >
+                      <Badge tone="indigo">{r.kind}</Badge>
+                      <span className="text-body">{r.title}</span>
+                      {r.source && <span className="ml-auto text-xs text-faint">{r.source}</span>}
+                    </a>
+                  ))}
+                </Card>
+              ) : (
+                <EmptyState title="No resources attached yet." />
+              )}
+            </section>
+          </div>
+
+          <section>
+            <SectionTitle>Quiz</SectionTitle>
             <Card>
-              <div className="mb-2 flex items-center gap-2">
-                <Badge tone="teal">Week {project.week}</Badge>
-                <Badge>{project.status}</Badge>
+              <div className="flex items-center gap-2">
+                <Badge tone={quizStatus === "completed" ? "teal" : quizStatus === "available" ? "indigo" : "neutral"}>
+                  {quizStatus}
+                </Badge>
+                <span className="text-sm text-muted">{quizLabel[quizStatus] ?? ""}</span>
               </div>
-              <h3 className="font-display text-lg font-semibold text-head">{project.title}</h3>
             </Card>
-          ) : (
-            <EmptyState title="No active project." />
-          )}
-        </section>
-      </div>
+          </section>
+        </>
+      ) : (
+        topicsTotal > 0 && <EmptyState title="🎉 Every topic complete!" hint="You've finished the whole curriculum." />
+      )}
     </div>
   );
 }

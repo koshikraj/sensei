@@ -29,11 +29,6 @@ export default async function NewsPage() {
                 {n.title}
               </a>
               {n.summary && <p className="mt-2 text-sm leading-relaxed text-muted">{n.summary}</p>}
-              {n.module && (
-                <div className="mt-3.5">
-                  <Badge tone="teal">{n.module}</Badge>
-                </div>
-              )}
             </Card>
           ))}
         </div>

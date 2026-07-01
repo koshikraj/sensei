@@ -1,51 +1,45 @@
-export type Topic = {
-  id: number;
+export type LessonView = {
+  position: number;
+  title: string;
+  format: string;
+  status: "completed" | "available" | "planned" | string;
+};
+
+export type ResourceView = {
+  kind: string;
+  title: string;
+  url: string | null;
+  source: string | null;
+};
+
+export type Today = {
+  topic: {
+    title: string;
+    module: string;
+    description: string | null;
+    objectives: string | null;
+  } | null;
+  lessons: LessonView[];
+  resources: ResourceView[];
+  quizStatus: string;
+  topicsDone: number;
+  topicsTotal: number;
+  avgMastery: number;
+};
+
+export type CurriculumModule = {
   seq: number;
-  week: number;
-  module: string;
   title: string;
-  format: string;
-  prerequisites: string | null;
+  topics: { seq: number; title: string; lessons: number; status: string }[];
 };
 
-export type Lesson = {
-  id: number;
-  topic_id: number | null;
-  lesson_date: string;
-  format: string;
-  title: string;
-  content: string;
-  status: string;
-  note: string | null;
-};
+export type ProgressTopic = { title: string; module: string; mastery: number; status: string };
 
-export type Quiz = {
-  id: number;
-  quiz_date: string;
-  topic_ids: number[];
-  questions: unknown;
-};
-
-export type Mastery = {
-  topic_id: number;
-  score: number;
-  last_reviewed: string | null;
-  next_review: string | null;
-};
-
-export type Project = {
-  id: number;
-  week: number;
-  title: string;
-  brief: string | null;
-  solution: string | null;
-  status: string;
-};
+export type ProjectItem = { moduleSeq: number; module: string; title: string; status: string };
 
 export type NewsItem = {
   id: number;
   news_date: string;
-  module: string | null;
   title: string;
   url: string;
   summary: string | null;

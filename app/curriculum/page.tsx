@@ -1,53 +1,42 @@
-import { Card, SectionTitle, Badge, EmptyState, PageHeader } from "@/components/ui";
-import { getTopics, getLessons } from "@/lib/queries";
-import type { Topic } from "@/lib/types";
+import { Card, Badge, EmptyState, PageHeader } from "@/components/ui";
+import { getCurriculum } from "@/lib/queries";
 
 export const revalidate = 300;
 
-export default async function CurriculumPage() {
-  const [topics, lessons] = await Promise.all([getTopics(), getLessons(200)]);
-  const doneSeq = new Set(
-    lessons.map((l) => topics.find((t) => t.id === l.topic_id)?.seq).filter(Boolean) as number[]
-  );
+const statusTone: Record<string, "teal" | "indigo" | "neutral"> = {
+  done: "teal",
+  "in progress": "indigo",
+  upcoming: "neutral",
+};
 
-  const byWeek = new Map<number, Topic[]>();
-  for (const t of topics) {
-    if (!byWeek.has(t.week)) byWeek.set(t.week, []);
-    byWeek.get(t.week)!.push(t);
-  }
+export default async function CurriculumPage() {
+  const modules = await getCurriculum();
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Curriculum" subtitle="10 weeks · 50 lessons · Beginner → job-ready." />
+      <PageHeader title="Curriculum" subtitle="Modules → topics → lessons. Self-paced — advance by finishing each topic." />
 
-      {topics.length === 0 ? (
-        <EmptyState title="Curriculum not loaded." hint="Run supabase/seed.sql to populate the 50-lesson plan." />
+      {modules.length === 0 ? (
+        <EmptyState title="Curriculum not loaded." hint="Run npm run db:setup to populate the plan." />
       ) : (
-        [...byWeek.entries()].map(([week, ts]) => (
-          <div key={week}>
+        modules.map((m) => (
+          <div key={m.seq}>
             <div className="mb-3 flex items-center gap-3">
               <div className="grid h-11 w-11 flex-none place-items-center rounded-[13px] bg-teal-soft font-display text-lg font-semibold text-teal">
-                {week}
+                {m.seq}
               </div>
-              <div>
-                <h3 className="font-display text-lg font-semibold text-head">Week {week}</h3>
-                <div className="text-[13px] text-muted">{ts[0].module}</div>
-              </div>
+              <h3 className="font-display text-lg font-semibold text-head">{m.title}</h3>
             </div>
             <Card className="divide-y divide-edge p-0">
-              {ts.map((t) => {
-                const done = doneSeq.has(t.seq);
-                return (
-                  <div key={t.id} className="flex items-center gap-3 px-4 py-3">
-                    <span className="w-6 text-xs text-faint">{t.seq}</span>
-                    <span className={done ? "text-head" : "text-body"}>{t.title}</span>
-                    {done && <span className="text-xs text-teal">✓</span>}
-                    <span className="ml-auto">
-                      <Badge>{t.format}</Badge>
-                    </span>
-                  </div>
-                );
-              })}
+              {m.topics.map((t) => (
+                <div key={t.seq} className="flex items-center gap-3 px-4 py-3">
+                  <span className="text-body">{t.title}</span>
+                  <span className="text-xs text-faint">{t.lessons} lessons</span>
+                  <span className="ml-auto">
+                    <Badge tone={statusTone[t.status] ?? "neutral"}>{t.status}</Badge>
+                  </span>
+                </div>
+              ))}
             </Card>
           </div>
         ))

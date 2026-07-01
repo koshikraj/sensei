@@ -117,10 +117,10 @@ Server Components fetch directly from Supabase with the anon key + RLS read poli
 
 | Route | Purpose | Reads |
 |---|---|---|
-| `/` (Today) | Current lesson, quiz, and project at a glance; streak | `lessons`, `quizzes`, `projects`, `mastery` |
-| `/curriculum` | 10-week / 50-lesson map + current position | `topics`, `lessons` |
-| `/progress` | Mastery heatmap, quiz history, streak | `mastery`, `quiz_attempts` |
-| `/archive` | Past lessons / quizzes / projects | `lessons`, `quizzes`, `projects` |
+| `/` (Today) | Current **topic** → its lessons, resources, and quiz status | `topics`, `lessons`, `resources`, `quizzes`, `mastery` |
+| `/curriculum` | Modules → topics map + status | `modules`, `topics`, `lessons` |
+| `/progress` | Per-topic mastery heatmap + focus list | `topics`, `mastery` |
+| `/archive` | Completed topics + module projects | `topics`, `mastery`, `projects` |
 | `/news` | Recent curated items | `news_items` |
 
 **Data layer**
@@ -148,20 +148,31 @@ Server Components fetch directly from Supabase with the anon key + RLS read poli
 
 ---
 
-## 6. Data model (Supabase)
+## 6. Data model (Supabase) — v2, completion-driven
 
-Defined in `supabase/schema.sql`:
+Defined in `supabase/schema.sql`. Structure is **modules → topics → lessons + resources**,
+one **quiz per topic**, one **project per module**. No hardcoded weeks/days: topics have an
+order and advance only when all their lessons AND their quiz are complete.
 
 ```
-topics        -- curriculum: seq, week, module, title, format, prerequisites
-lessons       -- generated daily lessons (topic_id, date, format, content, status)
-quizzes       -- daily quizzes (date, questions jsonb, topic_ids)
-quiz_attempts -- answers, score, per-topic results
-mastery       -- topic_id, score, last_reviewed, next_review (spaced repetition)
-projects      -- week, brief, starter, solution, criteria, status
-news_items    -- date, topic/module, title, url, summary, source
-edit_log      -- source (slack|dashboard|routine), actor, table, before, after, ts
+modules       -- seq, slug, title, description
+topics        -- seq (order), module_id, title, description, objectives, started_at, completed_at
+lessons       -- topic_id, position, title, format, content, status, available_at, completed_at
+resources     -- topic_id, lesson_id?, kind (article|video|doc|pdf|link|code|file), title, url, storage_path
+quizzes       -- topic_id (unique), questions, status (locked|due|available|completed), due_at, delivered_at
+quiz_attempts -- quiz_id, answers, score, per_topic_results
+mastery       -- topic_id, score, next_review (spaced repetition)
+projects      -- module_id (unique), title, brief, solution, criteria, status
+news_items    -- news_date, module_id, title, url, summary, source
+edit_log      -- source, actor, target, before, after, ts
 ```
+
+**Flow (state machine, in `routines/` + `supabase/views.sql`):** the current topic is the first
+one not `done`. Lessons are delivered when the topic starts; the learner completes them at their
+pace. The **per-topic quiz** is gated on two conditions — its scheduled slot AND all lessons done
+— and is delivered whichever comes last (finish lessons late → quiz auto-populates). Finishing
+the quiz completes the topic and advances to the next. Migrate an existing DB with
+`node supabase/run-sql.mjs migrate-v2.sql schema.sql seed.sql views.sql`.
 
 ---
 

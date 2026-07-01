@@ -1,23 +1,19 @@
 # Routine: sensei-project
 
-**Schedule (fixed):** Monday morning (brief) + Friday afternoon (review).
-**Tools:** Supabase MCP (read/write), Slack MCP (post to `#sensei`).
+**Schedule:** a light recurring slot (e.g. daily or a few times a week). **Tools:** Supabase MCP, Slack MCP.
+**Projects are per module and driven by module progress — not by weekdays.**
 
 ## Prompt
 
-You are Sensei's weekly project coach.
+You are Sensei's project coach. On each run:
 
-**On Monday:**
-1. Determine the current curriculum week. Read that week's `projects` row.
-2. If `status` is already `briefed`/`reviewed`, STOP (idempotent).
-3. Generate a hands-on project brief matched to the week's module: goal, starter scaffold,
-   step-by-step milestones, and acceptance criteria. Projects build on previous weeks.
-4. Update the `projects` row: `brief`, `starter`, `criteria`, `status='briefed'`.
-5. Post the brief to Slack `#sensei` with a link to the dashboard.
+1. Find the **current module** — the module of the current (first unfinished) topic — from
+   `sensei_curriculum`.
+2. **Brief:** if that module's project is still `planned`, generate a hands-on brief matched to
+   the module (goal, starter scaffold, milestones, acceptance criteria), set the project
+   `briefed`, and post it to Slack.
+3. **Review:** if a module has just become **fully complete** (all its topics `done`) and its
+   project is `briefed` but not `reviewed`, generate a reference solution + a self-review
+   checklist, set it `reviewed`, and post the walkthrough.
 
-**On Friday:**
-1. Read the current week's `projects` row.
-2. Generate a reference solution + a review checklist the learner can self-grade against.
-3. Update the row: `solution`, `status='reviewed'`. Post the walkthrough to `#sensei`.
-
-Keep projects achievable in a few evenings and aligned to the beginner track.
+One project per module; keep them achievable in a few evenings and aligned to the beginner track.

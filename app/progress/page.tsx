@@ -1,5 +1,5 @@
 import { Card, SectionTitle, EmptyState, PageHeader, MasteryRing } from "@/components/ui";
-import { getTopics, getMastery } from "@/lib/queries";
+import { getProgress } from "@/lib/queries";
 
 export const revalidate = 300;
 
@@ -11,43 +11,33 @@ function scoreColor(score: number) {
 }
 
 export default async function ProgressPage() {
-  const [topics, mastery] = await Promise.all([getTopics(), getMastery()]);
-  const byTopic = new Map(mastery.map((m) => [m.topic_id, m]));
-
-  const avg =
-    mastery.length > 0 ? Math.round(mastery.reduce((s, m) => s + m.score, 0) / mastery.length) : 0;
-  const weak = topics
-    .map((t) => ({ t, m: byTopic.get(t.id) }))
-    .filter((x) => x.m && x.m.score > 0 && x.m.score < 50)
-    .slice(0, 8);
+  const topics = await getProgress();
+  const scored = topics.filter((t) => t.mastery > 0);
+  const avg = scored.length ? Math.round(scored.reduce((s, t) => s + t.mastery, 0) / scored.length) : 0;
+  const weak = topics.filter((t) => t.mastery > 0 && t.mastery < 50).slice(0, 8);
 
   return (
     <div className="space-y-8">
-      <PageHeader title="Progress" subtitle="Mastery across all 50 topics." right={<MasteryRing value={avg} />} />
+      <PageHeader title="Progress" subtitle="Mastery across every topic." right={<MasteryRing value={avg} />} />
 
       {topics.length === 0 ? (
-        <EmptyState title="No data yet." hint="Progress fills in as you take daily quizzes." />
+        <EmptyState title="No data yet." hint="Progress fills in as you complete topics and quizzes." />
       ) : (
         <>
           <section>
-            <SectionTitle>Mastery heatmap</SectionTitle>
+            <SectionTitle>Topic mastery</SectionTitle>
             <Card>
-              <div className="grid grid-cols-10 gap-1.5">
-                {topics.map((t) => {
-                  const score = byTopic.get(t.id)?.score ?? 0;
-                  return (
-                    <div
-                      key={t.id}
-                      title={`${t.title} — ${score}%`}
-                      className="aspect-square rounded-md"
-                      style={{ background: scoreColor(score) }}
-                    />
-                  );
-                })}
+              <div className="flex flex-wrap gap-1.5">
+                {topics.map((t, i) => (
+                  <div
+                    key={i}
+                    title={`${t.title} — ${t.mastery}%`}
+                    className="h-7 w-7 rounded-md"
+                    style={{ background: scoreColor(t.mastery) }}
+                  />
+                ))}
               </div>
-              <p className="mt-3 text-xs text-faint">
-                Each cell is a topic, in curriculum order. Hover for details.
-              </p>
+              <p className="mt-3 text-xs text-faint">Each square is a topic, in order. Hover for details.</p>
             </Card>
           </section>
 
@@ -57,11 +47,11 @@ export default async function ProgressPage() {
               <EmptyState title="No weak topics — nice." />
             ) : (
               <Card className="divide-y divide-edge p-0">
-                {weak.map(({ t, m }) => (
-                  <div key={t.id} className="flex items-center justify-between px-4 py-3">
+                {weak.map((t, i) => (
+                  <div key={i} className="flex items-center justify-between px-4 py-3">
                     <span className="text-body">{t.title}</span>
                     <span className="text-sm font-bold" style={{ color: "#FB7185" }}>
-                      {m!.score}%
+                      {t.mastery}%
                     </span>
                   </div>
                 ))}

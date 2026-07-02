@@ -66,11 +66,11 @@ export default async function TodayPage() {
                 <Card className="divide-y divide-edge p-0">
                   {lessons.map((l) => (
                     <div key={l.position} className="flex items-center gap-3 px-4 py-3">
-                      <span className={`w-4 text-center ${l.status === "completed" ? "text-teal" : "text-faint"}`}>
+                      <span className={`w-4 flex-none text-center ${l.status === "completed" ? "text-teal" : "text-faint"}`}>
                         {lessonMark[l.status] ?? "·"}
                       </span>
-                      <span className={l.status === "completed" ? "text-head" : "text-body"}>{l.title}</span>
-                      <span className="ml-auto">
+                      <span className={`min-w-0 break-words ${l.status === "completed" ? "text-head" : "text-body"}`}>{l.title}</span>
+                      <span className="ml-auto flex-none">
                         <Badge>{l.format}</Badge>
                       </span>
                     </div>
@@ -93,9 +93,11 @@ export default async function TodayPage() {
                       rel="noreferrer"
                       className="flex items-center gap-3 px-4 py-3 hover:bg-track/40"
                     >
-                      <Badge tone="indigo">{r.kind}</Badge>
-                      <span className="text-body">{r.title}</span>
-                      {r.source && <span className="ml-auto text-xs text-faint">{r.source}</span>}
+                      <span className="flex-none">
+                        <Badge tone="indigo">{r.kind}</Badge>
+                      </span>
+                      <span className="min-w-0 break-words text-body">{r.title}</span>
+                      {r.source && <span className="ml-auto flex-none text-xs text-faint">{r.source}</span>}
                     </a>
                   ))}
                 </Card>

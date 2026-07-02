@@ -1,10 +1,16 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Nav from "@/components/Nav";
 
 export const metadata: Metadata = {
   title: "Sensei — AI Engineering Daily",
   description: "Your daily AI Engineering sensei.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 // Apply the saved theme before paint; default to light.

@@ -27,10 +27,17 @@ export type Today = {
   avgMastery: number;
 };
 
+export type CurriculumTopic = {
+  seq: number;
+  title: string;
+  status: string;
+  lessons: LessonView[];
+};
+
 export type CurriculumModule = {
   seq: number;
   title: string;
-  topics: { seq: number; title: string; lessons: number; status: string }[];
+  topics: CurriculumTopic[];
 };
 
 export type ProgressTopic = { title: string; module: string; mastery: number; status: string };

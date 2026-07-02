@@ -9,12 +9,14 @@ const statusTone: Record<string, "teal" | "indigo" | "neutral"> = {
   upcoming: "neutral",
 };
 
+const lessonMark: Record<string, string> = { completed: "✓", available: "•", planned: "·" };
+
 export default async function CurriculumPage() {
   const modules = await getCurriculum();
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Curriculum" subtitle="Modules → topics → lessons. Self-paced — advance by finishing each topic." />
+      <PageHeader title="Curriculum" subtitle="Modules → topics → lessons. Click a topic to see its lessons — advance by finishing each topic." />
 
       {modules.length === 0 ? (
         <EmptyState title="Curriculum not loaded." hint="Run npm run db:setup to populate the plan." />
@@ -28,15 +30,47 @@ export default async function CurriculumPage() {
               <h3 className="font-display text-lg font-semibold text-head">{m.title}</h3>
             </div>
             <Card className="divide-y divide-edge p-0">
-              {m.topics.map((t) => (
-                <div key={t.seq} className="flex items-center gap-3 px-4 py-3">
-                  <span className="text-body">{t.title}</span>
-                  <span className="text-xs text-faint">{t.lessons} lessons</span>
-                  <span className="ml-auto">
-                    <Badge tone={statusTone[t.status] ?? "neutral"}>{t.status}</Badge>
-                  </span>
-                </div>
-              ))}
+              {m.topics.map((t) => {
+                const done = t.lessons.filter((l) => l.status === "completed").length;
+                return (
+                  <details key={t.seq} className="group" open={t.status === "in progress"}>
+                    <summary className="flex cursor-pointer select-none list-none items-center gap-3 px-4 py-3 hover:bg-track/40 [&::-webkit-details-marker]:hidden">
+                      <svg
+                        className="h-3.5 w-3.5 flex-none text-faint transition-transform group-open:rotate-90"
+                        viewBox="0 0 16 16"
+                        fill="none"
+                        aria-hidden
+                      >
+                        <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                      <span className="text-body">{t.title}</span>
+                      <span className="text-xs text-faint">
+                        {done > 0 ? `${done}/${t.lessons.length} lessons` : `${t.lessons.length} lessons`}
+                      </span>
+                      <span className="ml-auto">
+                        <Badge tone={statusTone[t.status] ?? "neutral"}>{t.status}</Badge>
+                      </span>
+                    </summary>
+                    <div className="border-t border-edge bg-track/20 py-1">
+                      {t.lessons.length ? (
+                        t.lessons.map((l) => (
+                          <div key={l.position} className="flex items-center gap-3 py-2 pl-11 pr-4">
+                            <span className={`w-4 flex-none text-center ${l.status === "completed" ? "text-teal" : "text-faint"}`}>
+                              {lessonMark[l.status] ?? "·"}
+                            </span>
+                            <span className={`text-sm ${l.status === "completed" ? "text-head" : "text-body"}`}>{l.title}</span>
+                            <span className="ml-auto flex-none">
+                              <Badge>{l.format}</Badge>
+                            </span>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="py-2 pl-11 pr-4 text-sm text-faint">No lessons yet.</p>
+                      )}
+                    </div>
+                  </details>
+                );
+              })}
             </Card>
           </div>
         ))

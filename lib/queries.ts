@@ -1,5 +1,5 @@
 import { getSupabase } from "./supabase";
-import type { Today, CurriculumModule, ProgressTopic, ProjectItem, NewsItem } from "./types";
+import type { Today, CurriculumModule, LessonView, ProgressTopic, ProjectItem, NewsItem } from "./types";
 
 // All read helpers degrade to empty results when Supabase isn't configured.
 
@@ -69,11 +69,20 @@ export async function getCurriculum(): Promise<CurriculumModule[]> {
   const [{ data: modules }, { data: topics }, { data: lessons }] = await Promise.all([
     db.from("modules").select("id,seq,title").order("seq"),
     db.from("topics").select("id,seq,title,module_id,started_at,completed_at").order("seq"),
-    db.from("lessons").select("topic_id"),
+    db.from("lessons").select("topic_id,position,title,format,status,completed_at").order("position"),
   ]);
   if (!modules) return [];
-  const lessonCount = new Map<number, number>();
-  (lessons ?? []).forEach((l) => lessonCount.set(l.topic_id, (lessonCount.get(l.topic_id) ?? 0) + 1));
+  const topicLessons = new Map<number, LessonView[]>();
+  (lessons ?? []).forEach((l) => {
+    const list = topicLessons.get(l.topic_id) ?? [];
+    list.push({
+      position: l.position,
+      title: l.title,
+      format: l.format,
+      status: l.completed_at ? "completed" : l.status,
+    });
+    topicLessons.set(l.topic_id, list);
+  });
   return modules.map((m) => ({
     seq: m.seq,
     title: m.title,
@@ -82,7 +91,7 @@ export async function getCurriculum(): Promise<CurriculumModule[]> {
       .map((t) => ({
         seq: t.seq,
         title: t.title,
-        lessons: lessonCount.get(t.id) ?? 0,
+        lessons: topicLessons.get(t.id) ?? [],
         status: t.completed_at ? "done" : t.started_at ? "in progress" : "upcoming",
       })),
   }));

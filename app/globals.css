@@ -47,9 +47,14 @@
   --shadow: 0 12px 30px rgba(10, 15, 23, 0.3);
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   @apply bg-canvas text-body antialiased;
   font-family: "Nunito", system-ui, sans-serif;
+  overflow-wrap: break-word;
 }
 
 .prose-sensei h1 { @apply text-2xl font-semibold mt-4 mb-2 text-head; font-family: "Fredoka", sans-serif; }

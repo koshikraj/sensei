@@ -19,10 +19,10 @@ export default async function ArchivePage() {
           <Card className="divide-y divide-edge p-0">
             {done.map((t, i) => (
               <div key={i} className="flex items-center gap-3 px-4 py-3">
-                <span className="text-teal">✓</span>
-                <span className="text-head">{t.title}</span>
-                <span className="text-xs text-faint">{t.module}</span>
-                <span className="ml-auto">
+                <span className="flex-none text-teal">✓</span>
+                <span className="min-w-0 flex-1 truncate text-head">{t.title}</span>
+                <span className="flex-none text-xs text-faint">{t.module}</span>
+                <span className="ml-auto flex-none">
                   <Badge tone="teal">{t.mastery}%</Badge>
                 </span>
               </div>

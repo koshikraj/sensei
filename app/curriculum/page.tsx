@@ -43,11 +43,11 @@ export default async function CurriculumPage() {
                       >
                         <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
                       </svg>
-                      <span className="text-body">{t.title}</span>
-                      <span className="text-xs text-faint">
+                      <span className="min-w-0 flex-1 truncate text-body">{t.title}</span>
+                      <span className="flex-none whitespace-nowrap text-xs text-faint">
                         {done > 0 ? `${done}/${t.lessons.length} lessons` : `${t.lessons.length} lessons`}
                       </span>
-                      <span className="ml-auto">
+                      <span className="flex-none">
                         <Badge tone={statusTone[t.status] ?? "neutral"}>{t.status}</Badge>
                       </span>
                     </summary>
@@ -58,7 +58,7 @@ export default async function CurriculumPage() {
                             <span className={`w-4 flex-none text-center ${l.status === "completed" ? "text-teal" : "text-faint"}`}>
                               {lessonMark[l.status] ?? "·"}
                             </span>
-                            <span className={`text-sm ${l.status === "completed" ? "text-head" : "text-body"}`}>{l.title}</span>
+                            <span className={`min-w-0 break-words text-sm ${l.status === "completed" ? "text-head" : "text-body"}`}>{l.title}</span>
                             <span className="ml-auto flex-none">
                               <Badge>{l.format}</Badge>
                             </span>
